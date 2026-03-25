@@ -32,19 +32,6 @@
     </div>
 
     <script>
-        // AL CARGAR LA PÁGINA: Comprobar si hay un fondo guardado en Base64
-        window.onload = function() {
-            fetch('/api/background')
-                .then(res => res.json())
-                .then(data => {
-                    if (data.background && data.background !== '') {
-                        // Si existe un fondo en el servidor, reemplaza el de por defecto
-                        document.body.style.backgroundImage = `url('${data.background}')`;
-                    }
-                })
-                .catch(err => console.error("Error cargando el fondo:", err));
-        };
-
         function procesarEntrada() {
             const input = document.getElementById('numeroInput').value;
             const errorMsg = document.getElementById('errorMsg');

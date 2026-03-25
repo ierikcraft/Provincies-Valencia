@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mapa valencia</title>
+    <title>Buscador de Imágenes</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
             /* ⚠️ PON AQUÍ TU ENLACE DE IMAGEN DE FONDO ⚠️ */
-            background-image: url('https://www.spain.info/es/destino/valencia/');
+            background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1920&auto=format&fit=crop');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -32,6 +32,19 @@
     </div>
 
     <script>
+        // AL CARGAR LA PÁGINA: Comprobar si hay un fondo guardado en Base64
+        window.onload = function() {
+            fetch('/api/background')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.background && data.background !== '') {
+                        // Si existe un fondo en el servidor, reemplaza el de por defecto
+                        document.body.style.backgroundImage = `url('${data.background}')`;
+                    }
+                })
+                .catch(err => console.error("Error cargando el fondo:", err));
+        };
+
         function procesarEntrada() {
             const input = document.getElementById('numeroInput').value;
             const errorMsg = document.getElementById('errorMsg');
@@ -46,7 +59,7 @@
             const numero = parseInt(input);
             if (numero >= 1 && numero <= 34) {
                 // Redirige directamente a la imagen subida
-                window.location.href = '/image/' + numero + '.pdf';
+                window.location.href = '/image/' + numero + '.png';
             } else {
                 // Muestra error si no cumple las reglas
                 errorMsg.classList.remove('hidden');

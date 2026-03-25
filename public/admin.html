@@ -30,9 +30,77 @@
             </button>
         </form>
         
-        <div class="mt-4 text-center">
+        <!-- NUEVA SECCIÓN PARA EL FONDO EN BASE64 -->
+        <hr class="my-8 border-gray-200">
+        <h2 class="text-xl font-bold mb-4 text-gray-800 text-center">Cambiar Fondo de la Web</h2>
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Seleccionar Imagen de tu Galería</label>
+                <input type="file" id="bgInput" accept="image/*"
+                       class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100">
+            </div>
+            <button onclick="subirFondo()" 
+                    class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
+                Actualizar Fondo (Base64)
+            </button>
+            <p id="bgStatus" class="text-sm text-center font-semibold hidden"></p>
+        </div>
+
+        <div class="mt-6 text-center">
             <a href="/" class="text-sm text-gray-500 hover:text-blue-600 transition">← Volver al inicio</a>
         </div>
+    </div>
+
+    <script>
+        // Función para convertir la imagen a Base64 y enviarla al servidor
+        function subirFondo() {
+            const fileInput = document.getElementById('bgInput');
+            const status = document.getElementById('bgStatus');
+            
+            if (!fileInput.files.length) {
+                status.textContent = "Por favor selecciona una imagen primero.";
+                status.className = "text-sm text-center font-semibold text-red-600 block mt-2";
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            
+            // Mostrar mensaje de carga
+            status.textContent = "Convirtiendo a Base64 y subiendo...";
+            status.className = "text-sm text-center font-semibold text-yellow-600 block mt-2";
+
+            reader.onload = function(e) {
+                const base64String = e.target.result; // Aquí obtenemos el Base64 de la imagen
+
+                fetch('/api/background', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ background: base64String })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.success) {
+                        status.textContent = "¡Fondo actualizado con éxito!";
+                        status.className = "text-sm text-center font-semibold text-green-600 block mt-2";
+                    }
+                })
+                .catch(err => {
+                    status.textContent = "Error al actualizar el fondo.";
+                    status.className = "text-sm text-center font-semibold text-red-600 block mt-2";
+                });
+            };
+            
+            // Lee el archivo como una URL de datos (Base64)
+            reader.readAsDataURL(file);
+        }
+    </script>
+
+    <!-- Firma -->
+    <div class="fixed bottom-4 w-full text-center text-gray-500 text-sm font-medium tracking-wider pointer-events-none">
+        Hecho por Erik
     </div>
 </body>
 </html>

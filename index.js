@@ -7,8 +7,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Aumentar el límite para poder recibir imágenes grandes en Base64
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(express.json({ limit: '100mb' }));
+app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 // Variable en memoria para guardar el fondo temporalmente
 let currentBackgroundBase64 = '';
@@ -47,7 +47,7 @@ const storage = multer.diskStorage({
     },
     filename: function (req, file, cb) {
         const numero = req.body.numero;
-        cb(null, numero + '.png');
+        cb(null, numero + '.pdf');
     }
 });
 

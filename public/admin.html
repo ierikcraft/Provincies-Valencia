@@ -67,33 +67,71 @@
             const reader = new FileReader();
             
             // Mostrar mensaje de carga
-            status.textContent = "Convirtiendo a Base64 y subiendo...";
+            status.textContent = "Comprimiendo imagen y subiendo a la nube...";
             status.className = "text-sm text-center font-semibold text-yellow-600 block mt-2";
 
             reader.onload = function(e) {
-                const base64String = e.target.result; // Aquí obtenemos el Base64 de la imagen
+                // Crear una imagen en memoria para poder redimensionarla
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
 
-                fetch('/api/background', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ background: base64String })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if(data.success) {
-                        status.textContent = "¡Fondo actualizado con éxito!";
-                        status.className = "text-sm text-center font-semibold text-green-600 block mt-2";
+                    // Tamaño máximo permitido (Resolución Full HD)
+                    const MAX_WIDTH = 1920;
+                    const MAX_HEIGHT = 1080;
+
+                    // Calcular nuevas dimensiones manteniendo la proporción
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
                     }
-                })
-                .catch(err => {
-                    status.textContent = "Error al actualizar el fondo.";
-                    status.className = "text-sm text-center font-semibold text-red-600 block mt-2";
-                });
+
+                    // Dibujar la imagen redimensionada en el canvas
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Convertir a JPEG con calidad al 70% (reduce muchísimo el peso, evita el error 413)
+                    const base64String = canvas.toDataURL('image/jpeg', 0.7);
+
+                    fetch('/api/background', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ background: base64String })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if(data.success) {
+                            status.textContent = "¡Fondo actualizado con éxito!";
+                            status.className = "text-sm text-center font-semibold text-green-600 block mt-2";
+                        } else {
+                            status.textContent = "Error al guardar el fondo.";
+                            status.className = "text-sm text-center font-semibold text-red-600 block mt-2";
+                        }
+                    })
+                    .catch(err => {
+                        status.textContent = "Error al conectar con el servidor.";
+                        status.className = "text-sm text-center font-semibold text-red-600 block mt-2";
+                    });
+                };
+                
+                // Cargar la imagen original en nuestra variable "img"
+                img.src = e.target.result;
             };
             
-            // Lee el archivo como una URL de datos (Base64)
+            // Lee el archivo original
             reader.readAsDataURL(file);
         }
     </script>
